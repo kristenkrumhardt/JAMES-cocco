@@ -1,0 +1,106 @@
+Instructions for doing CESM-cocco simulations described in Krumhardt et al., JAMES
+
+
+
+1.	Running the physics spin up (100 years)
+a.	From the CESM-cocco directory:
+$ cd cime/scripts
+
+$ ./create_newcase --compset G --res T62_g17 –-case ../../cases/G.T62_17.physics_spinup
+
+$ cd ../../cases/G.T62_g17.physics_spinup
+
+$ ./case.setup
+
+• From case_setup_files in JAMES-cocco directory, copy the user_nl_pop into the case directory above.
+
+$ ./case.build
+$ ./xmlchange STOP_N=10 
+$ ./xmlchange STOP_OPTION=nyears
+$ ./xmlchange DOUT_S=FALSE
+
+$ ./case.submit 
+
+b.	After the first 10 years of the simulation is finished, this will run the rest of the 100 year physics spin up:
+
+$ ./xmlchange CONTINUE_RUN=TRUE
+$ ./xmlchange RESUBMIT=8
+$ ./case.submit 
+
+
+2.	Running the preindustrial spin up (100years)
+a.	From the CESM-cocco directory:
+
+$ cd cime/scripts
+
+$ ./create_newcase --compset G1850ECO --res T62_g17 –-case ../../cases/G1850ECO.T62_g17.PI_run
+
+$ cd ../../cases/G1850ECO.T62_g17.PI_run
+
+$ ./case.setup
+
+• From case_setup_files directory in the JAMES-cocco directory, copy user_nl_pop and user_nl_marbl into the case directory.
+• Copy the restart files from the physics spinup (all restart files for cice, cpl, datm, drof, pop.r, pop.ro with 0101-01-01-00000, and ww3 and all rpointer files) into the G1850ECO.T62_g17.PI_run/run folder where the output will be stored (the ‘run’ was created with the case.setup command above)
+
+$ ./case.build
+
+$ ./xmlchange RUN_TYPE=hybrid
+$ ./xmlchange RUN_REFCASE=G.T62_g17.physics_spinup
+$ ./xmlchange RUN_REFDATE=0101-01-01
+$ ./xmlchange RUN_STARTDATE=0101-01-01
+$ ./xmlchange STOP_N=10 
+$ ./xmlchange STOP_OPTION=nyears
+$ ./xmlchange DOUT_S=FALSE
+
+$ ./case.submit 
+
+a.	After the first 10 years of the simulation is finished, this will run the rest of the 100 year PI spin up:
+    • comment out the BGC initialization files in user_nl_pop
+$ ./xmlchange CONTINUE_RUN=TRUE
+$ ./xmlchange RESUBMIT=8
+$ ./case.submit 
+
+
+3.	Branch higher CO2 runs and continue PI run until year 250
+
+a.	From the CESM-cocco directory:
+
+$ cd cime/scripts
+
+$ ./create_newcase --compset G1850ECO --res T62_g17 –-case ../../cases/G1850ECO.T62_g17.branchCO2_400ppm
+
+$ cd ../../cases/G1850ECO.T62_g17. branchCO2_400ppm
+
+$ ./case.setup
+
+• From case_setup_files directory in the JAMES-cocco directory, copy user_nl_pop and user_nl_marbl into the case directory.
+• Copy the restart files from the PI spinup (all restart files for cice, cpl, datm, drof, pop.r, pop.ro with 0201-01-01-00000, and ww3 and all rpointer files) into the G1850ECO.T62_g17. branchCO2_400ppm/run folder where the output will be stored (the ‘run’ was created with the case.setup command above)
+
+$ ./case.build
+
+$ ./xmlchange STOP_N=10 
+$ ./xmlchange RUN_TYPE=branch
+$ ./xmlchange RUN_REFCASE=G.T62_g17.PIrun
+$ ./xmlchange RUN_REFDATE=0201-01-01
+$ ./xmlchange RUN_STARTDATE=0201-01-01
+$ ./xmlchange STOP_N=10 
+$ ./xmlchange STOP_OPTION=nyears
+$ ./xmlchange DOUT_S=FALSE
+$ ./xmlchange CCSM_CO2_PPMV=400.0
+
+b.	After the first 10 years of the simulation is finished, this will run the rest of the 50 years:
+     • comment out the BGC initialization files in user_nl_pop
+$ ./xmlchange CONTINUE_RUN=TRUE
+$ ./xmlchange RESUBMIT=4
+$ ./case.submit 
+
+c.	Repeat the above steps for 600, 700, 900 µatm CO2 (naming the cases appropriately and doing the xmlchange of CCSM_CO2_PPMV to corresponding CO2 concentration)
+
+d.	Finish the PI_run (do 50 more years):
+
+•go to case directory for PIrun
+
+$ ./xmlchange RESUBMIT=5
+$ ./case.submit 
+
+
